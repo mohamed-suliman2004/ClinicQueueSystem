@@ -22,27 +22,26 @@ class ConfirmablePasswordController extends Controller
     /**
      * Confirm the user's password.
      */
-    public function store(Request $request): RedirectResponse
-    {
-        if (! Auth::guard('web')->validate([
-            'email' => $request->user()->email,
-            'password' => $request->password,
-        ])) {
-            throw ValidationException::withMessages([
-                'password' => __('auth.password'),
-            ]);
-        }
-
-        $request->session()->put('auth.password_confirmed_at', time());
-   if($request=='admin'){
-            return redirect()->route('admin.index');
-        }elseif($request=='reception'){
-            return redirect()->route('reception.index');
-        }elseif($request=='user'){
-             return redirect()->route('patient.index');
-        }else{
-            Auth::logout();
-            return redirect('/login');
-        }
+  public function store(Request $request): RedirectResponse
+{
+    if (!Auth::guard('web')->validate([
+        'email' => $request->user()->email,
+        'password' => $request->password,
+    ])) {
+        throw ValidationException::withMessages([
+            'password' => __('auth.password'),
+        ]);
     }
+
+    $request->session()->put('auth.password_confirmed_at', time());
+
+    $role = $request->user()->role;
+
+    return match ($role) {
+        'admin' => redirect()->route('admin.index'),
+        'reception' => redirect()->route('reception.index'),
+        'patient' => redirect()->route('patient.index'),
+        default => redirect('/dashboard'),
+    };
+}
 }

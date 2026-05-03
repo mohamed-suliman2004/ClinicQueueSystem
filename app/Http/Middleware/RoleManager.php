@@ -9,43 +9,36 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleManager
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
-    public function handle(Request $request, Closure $next,$role): Response
+    public function handle(Request $request, Closure $next, $role): Response
     {
-              if ($request->routeIs('logout')) {
-        return $next($request);
-    }
+        // لو مش مسجل دخول
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
 
-    if (!Auth::check()) {
-        return redirect('/login');
-    }
+        // دور المستخدم الحالي
+        $authuser = Auth::user()->role;
 
-    $authuser = Auth::user()->role;
+        // لو الدور صحيح خليه يكمل
+        if ($authuser == $role) {
+            return $next($request);
+        }
 
-    if (
-        ($role === 'admin' && $authuser === 'admin') ||
-        ($role === 'reception' && $authuser === 'reception') ||
-        ($role === 'patient' && $authuser === 'patient')
-    ) {
-        return $next($request);
-    }
-
-    switch ($authuser) {
-          case 'admin':
+        // لو دخل صفحة غلط، رجعه لصفحته الصحيحة
+        if ($authuser == 'admin') {
             return redirect()->route('admin.index');
-            break;
-        case 'reception':
+        }
+
+        if ($authuser == 'reception') {
             return redirect()->route('reception.index');
-            break;
-        case 'patient':
+        }
+
+        if ($authuser == 'patient') {
             return redirect()->route('patient.index');
-            break;
-            default:
-                return redirect('/login');
-    }
+        }
+
+        // fallback
+        Auth::logout();
+        return redirect('/login');
     }
 }

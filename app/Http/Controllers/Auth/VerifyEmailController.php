@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 
 class VerifyEmailController extends Controller
 {
@@ -23,15 +22,8 @@ class VerifyEmailController extends Controller
             event(new Verified($request->user()));
         }
 
-        if($request=='admin'){
-            return redirect()->route('admin.index');
-        }elseif($request=='reception'){
-            return redirect()->route('reception.index');
-        }elseif($request=='user'){
-             return redirect()->route('patient.index');
-        }else{
-            Auth::logout();
-            return redirect('/login');
-        }
+       // بدلاً من التوجيه المباشر للـ dashboard
+// ابحث عن هذا السطر وغيره:
+return redirect()->intended(route($request->user()->role . '.index', absolute: false).'?verified=1');
     }
 }

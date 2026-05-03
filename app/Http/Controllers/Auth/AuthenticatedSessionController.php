@@ -17,6 +17,7 @@ class AuthenticatedSessionController extends Controller
     public function create(): View
     {
         return view('auth.login');
+        
     }
 
     /**
@@ -24,19 +25,20 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-             $request->authenticate();
+           $request->authenticate();
 
         $request->session()->regenerate();
 
-        $authuser = Auth::user()->role;
-        if ($authuser == 'admin') {
+        $authuser= Auth::user()->role;
+
+        if($authuser=='admin'){
             return redirect()->route('admin.index');
-        } elseif ($authuser == 'reception') {
+        }elseif($authuser=='patient'){
+             return redirect()->route('patient.index');
+        }elseif($authuser=='reception'){
             return redirect()->route('reception.index');
-        } elseif ($authuser == 'patient') {
-            return redirect()->route('patient.index');
-        } else {
-            Auth::logout();
+        }else{
+           Auth::logout();
             return redirect('/login');
         }
     }
