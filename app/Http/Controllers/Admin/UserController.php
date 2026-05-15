@@ -13,7 +13,7 @@ class UserController extends Controller
         public function manageUsers(){
             $users = User::all();
             return view('admin.user.manage', compact('users'));
-        }
+               }
 
 
 
@@ -32,12 +32,10 @@ public function updateUser(Request $request,$id){
     return redirect()->route('admin.users.manage')->with('success','User updated successfully');
 }
 
-
-
-        public function deleteUser($id){
-            $user = User::find($id);
-            $user->delete();
-            return redirect()->route('admin.users.manage');
-        }
+public function deleteUser(Request $request,$id){
+    $user=User::findorfail($id);
+    $user->delete();
+    return redirect()->route('admin.users.manage')->with('success','User deleted successfully');
+}
     }
 

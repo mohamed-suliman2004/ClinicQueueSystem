@@ -16,22 +16,24 @@ class DoctorController extends Controller
     }
 
 
-    public function storeDoctor(Request $request){
-        $request->validate([
-            'name' => ['required'],
-            'email' => ['required'],
-            'phone' => ['required'],
-            'department' => ['required'],
-        ]);
-        Doctor::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'department_id' => $request->department
-        ]);
-        return redirect()->route('admin.doctors.manage');
-    }
+    public function storeDoctor(Request $request)
+{
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'email', 'unique:doctors,email'],
+        'phone' => ['required', 'digits:10', 'unique:doctors,phone'],
+        'department' => ['required', 'exists:departments,id'],
+    ]);
 
+    Doctor::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        'department_id' => $request->department
+    ]);
+
+    return redirect()->route('admin.doctors.manage')->with('success', 'Doctor created successfully');
+}
 
 
     public function manageDoctors(){
@@ -47,26 +49,32 @@ class DoctorController extends Controller
     }
 
 
-    public function updateDoctor(Request $request,$id){
-        $request->validate([
-            'name' => ['required'],
-            'email' => ['required'],
-            'phone' => ['required'],
-            'department' => ['required'],
-        ]);
-        $doctor = Doctor::find($id);
-        $doctor->name = $request->name;
-        $doctor->email = $request->email;
-        $doctor->phone = $request->phone;
-        $doctor->department_id = $request->department;
-        $doctor->save();
-        return redirect()->route('admin.doctors.manage');
-    }
+public function updateDoctor(Request $request, $id)
+{
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'email', 'unique:doctors,email,' . $id],
+        'phone' => ['required', 'digits:10', 'unique:doctors,phone,' . $id],
+        'department' => ['required', 'exists:departments,id'],
+    ]);
 
+    $doctor = Doctor::findOrFail($id);
+
+    $doctor->name = $request->name;
+    $doctor->email = $request->email;
+    $doctor->phone = $request->phone;
+    $doctor->department_id = $request->department;
+
+    $doctor->save();
+
+    return redirect()
+        ->route('admin.doctors.manage')
+        ->with('success', 'Doctor updated successfully');
+}
 
     public function deleteDoctor($id){
         $doctor = Doctor::find($id);
         $doctor->delete();
-        return redirect()->route('admin.doctors.manage');
+        return redirect()->route('admin.doctors.manage')->with('success','Doctor deleted successfully');
     }
 }

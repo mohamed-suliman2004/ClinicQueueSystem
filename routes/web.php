@@ -56,8 +56,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
 Route::controller(App\Http\Controllers\Admin\IndexController::class)->group(function () {
     Route::prefix('admin')->group(function () {
-        Route::get('/', 'index')
-            ->name('admin.index');
+        Route::get('/', 'index') ->name('admin.index');
     });
 });
 });
